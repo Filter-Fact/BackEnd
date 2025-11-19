@@ -1,4 +1,4 @@
-package com.example.f_f.config;
+package com.example.f_f.chat.entity;
 
 public enum Role {
     USER,

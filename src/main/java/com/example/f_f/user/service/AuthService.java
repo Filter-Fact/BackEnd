@@ -4,6 +4,7 @@ import com.example.f_f.email.service.EmailVerificationService;
 import com.example.f_f.global.exception.CustomException;
 import com.example.f_f.global.exception.RsCode;
 import com.example.f_f.user.dto.*;
+import com.example.f_f.user.entity.Purpose;
 import com.example.f_f.user.entity.User;
 import com.example.f_f.user.jwt.JwtService;
 import com.example.f_f.user.jwt.TokenStore;
@@ -21,33 +22,35 @@ public class AuthService {
     private final AuthenticationManager authManager;
     private final JwtService jwt;
     private final TokenStore store;
-    private final UserRepository users;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
 
     // 회원가입
     public String register(RegisterRequest req) {
         // userId 중복 확인
-        if (users.existsByUserId(req.userId())) {
+        if (userRepository.existsByUserId(req.userId())) {
             throw new CustomException(RsCode.DUPLICATE_USER_ID);
         }
 
         // 이메일 인증 선확인
-        emailVerificationService.ensureVerified(req.email(), "signup");
+        emailVerificationService.ensureVerified(req.email(), String.valueOf(Purpose.SIGN_UP));
 
         User u = new User();
         u.setUserId(req.userId());
         u.setPassword(passwordEncoder.encode(req.password()));
         u.setEmail(req.email());
-        users.save(u);
+        userRepository.save(u);
         return u.getUserId();
     }
 
     // 로그인
     public TokenResponse login(LoginRequest req) {
+
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.username(), req.password())
         );
+
         UserDetails user = (UserDetails) auth.getPrincipal();
 
         String access = jwt.generateAccessToken(user);

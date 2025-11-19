@@ -19,19 +19,20 @@ repositories { mavenCentral() }
 
 dependencies {
     // --- Spring ---
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'   // ✅ 추가
+    implementation 'org.springframework.boot:spring-boot-starter-web' //was 내장 서버 쓸라면
+    implementation 'org.springframework.boot:spring-boot-starter-validation' //valid 검증 로직 쓸라면
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA의 구현체인 hibernate 쓸라면 + spring 부가 기능 사용 가능
+    implementation 'org.springframework.boot:spring-boot-starter-security' // spring security fillter 설정 가능
 
     // DB 드라이버 (둘 다 쓰지 않으면 하나만 남기세요)
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql' //원래 spring에서 db와 실제 connection을 맺어주는 인터페이스가 있는데
+                                            //JDBC Driver라고 있거든? 그래서 컴파일 시점에는 postgre에 대한 라이브러리가 필요가 없고 실제 실행 때만 알면 되서 runtime으로 선언 ㅇㅋ?
 
     // WebClient가 필요하면 유지 (없으면 삭제)
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'   // (선택)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'  //webflux -> 얘가 비동기 방식이야 vs mvc -> 얘는 동기화 이렇게 나뉘거든?
 
     // Redis (리프레시 토큰 저장용, 선택)
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis' //근데 갑자기 든 생각, 시발 얘도 jdbc가 알아서 연결해줄텐데 얘는 왜 컴팡일 시점에 라이브러리가 필요하지?
 
     // --- JWT (jjwt 0.11.5) ---
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -44,22 +45,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    //SMTP
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'com.mysql:mysql-connector-j:8.0.33'
 
-
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'  // WebClient
-    runtimeOnly 'org.postgresql:postgresql'
-
-
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.3'
-    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
-    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.3'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-
-
-    // 외부 AI 서버 REST 호출
-    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient
 }
 
 tasks.named('test') { useJUnitPlatform() }

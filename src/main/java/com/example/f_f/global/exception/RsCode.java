@@ -22,7 +22,8 @@ public enum RsCode {
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "유효하지 않은 리프레시 토큰입니다."),
 
     // ---------- Email ----------
-    INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_CODE", "인증 코드가 올바르지 않거나 만료되었습니다."),
+    VERIFICATION_TIME_OUT(HttpStatus.BAD_REQUEST, "VERIFICATION_TIME_OUT", "인증 코드가 만료되었습니다."),
+    INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_CODE", "인증 코드가 올바르지 않습니다."),
 
     // ---------- AI ----------
     AI_UPSTREAM_ERROR(HttpStatus.BAD_GATEWAY, "AI_UPSTREAM_ERROR", "외부 서비스 오류가 발생했습니다."),

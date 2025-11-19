@@ -1,9 +1,9 @@
 package com.example.f_f.chat.service;
 
-import com.example.f_f.ai.dto.AnswerResponse;
-import com.example.f_f.ai.dto.UserQuestionDto;
+import com.example.f_f.chat.dto.AnswerResponse;
+import com.example.f_f.chat.dto.UserQuestionDto;
+import com.example.f_f.chat.entity.Role;
 import com.example.f_f.chat.dto.ChatMessageDto;
-import com.example.f_f.config.Role;
 import com.example.f_f.chat.entity.ChatMessage;
 import com.example.f_f.chat.entity.Conversation;
 import com.example.f_f.chat.repository.ChatMessageRepository;
@@ -27,35 +27,12 @@ public class ChatMessageService {
 
     private final ConversationRepository conversationRepo;
     private final ChatMessageRepository messageRepo;
-    private final UserRepository userRepository;
 
     // FastAPI 연동용
     private final WebClient fastApiClient;
 
     @Value("${fastapi.ask-path}")
     private String askPath;
-
-
-    /** 사용자 메시지 추가 */
-    @Transactional
-    public ChatMessage addUserMessage(Long conversationId, String userId, String content) {
-        Conversation conv = conversationRepo.findById(conversationId)
-                .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
-
-        // 소유자 검증
-        if (!conv.getUser().getUserId().equals(userId)) {
-            throw new CustomException(RsCode.FORBIDDEN);
-        }
-
-        ChatMessage m = ChatMessage.builder()
-                .conversation(conv)
-                .role(Role.USER)
-                .content(content)
-                .build();
-
-        return messageRepo.save(m);
-    }
-
 
     /** 어시스턴트 메시지 추가 (→ FastAPI 호출, 응답 저장) */
     @Transactional

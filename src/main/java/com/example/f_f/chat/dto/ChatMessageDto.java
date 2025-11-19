@@ -1,6 +1,6 @@
 package com.example.f_f.chat.dto;
 
-import com.example.f_f.config.Role;
+import com.example.f_f.chat.entity.Role;
 
 import java.time.Instant;
 

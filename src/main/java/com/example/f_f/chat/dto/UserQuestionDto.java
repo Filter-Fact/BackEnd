@@ -1,4 +1,4 @@
-package com.example.f_f.ai.dto;
+package com.example.f_f.chat.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

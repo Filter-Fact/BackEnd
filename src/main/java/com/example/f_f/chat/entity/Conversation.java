@@ -1,6 +1,7 @@
 package com.example.f_f.chat.entity;
 
 import com.example.f_f.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
