@@ -24,7 +24,7 @@ spec:
 
           envFrom:
             - secretRef:
-                name: f-f-redis-secret
+                name: f-f-secret
 
           # Redis 데이터 저장 (비영구)
           volumeMounts:
