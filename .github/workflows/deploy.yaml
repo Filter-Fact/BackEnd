@@ -88,7 +88,7 @@ jobs:
       - name: Deploy Backend With Updated Image Tag
         run: |
           kubectl set image deployment/f-f-backend \
-            f-f-backend=contest-cluster54-registry.kr.ncr.ntruss.com/filterfacts-backend:$TAG \
+            f-f-backend=refactoring-registry.kr.ncr.ntruss.com/filterfacts-backend:$TAG \
             --record
           kubectl rollout status deployment/f-f-backend --timeout=200s
 
