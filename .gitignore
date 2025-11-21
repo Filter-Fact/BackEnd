@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Custom ###
+f-f-secret.yaml

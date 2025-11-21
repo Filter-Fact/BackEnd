@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: contest-cluster54-registry.kr.ncr.ntruss.com/filterfacts-postgres:latest
+          ports:
+            - containerPort: 5432
+
+          # 🔥 env 개별 지정 제거
+          # 🔥 Secret 전체 주입 방식
+          envFrom:
+            - secretRef:
+                name: f-f-postgres-secret
+
+          volumeMounts:
+            - name: postgres-volume
+              mountPath: /var/lib/postgresql/data
+      imagePullSecrets:
+        - name: ncr-secret
+
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
