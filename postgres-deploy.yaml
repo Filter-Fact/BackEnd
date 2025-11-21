@@ -21,7 +21,7 @@ spec:
 
           envFrom:
             - secretRef:
-                name: f-f-postgres-secret
+                name: f-f-secret
 
           volumeMounts:
             - name: postgres-volume
