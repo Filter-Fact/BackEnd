@@ -14,12 +14,11 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: contest-cluster54-registry.kr.ncr.ntruss.com/filterfacts-postgres:latest
+          image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-postgres:latest
           ports:
             - containerPort: 5432
 
-          # 🔥 env 개별 지정 제거
-          # 🔥 Secret 전체 주입 방식
+
           envFrom:
             - secretRef:
                 name: f-f-postgres-secret
