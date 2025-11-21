@@ -37,7 +37,7 @@ jobs:
 
           echo "${{ secrets.NCP_REGISTRY_PASSWORD }}" | docker login \
             -u "${{ secrets.NCP_REGISTRY_USERNAME }}" \
-            --password-stdin contest-cluster54-registry.kr.ncr.ntruss.com
+            --password-stdin   refactoring-registry.kr.ncr.ntruss.com
 
           docker build -t $IMAGE:$TAG -t $IMAGE:latest .
           docker push $IMAGE:$TAG
