@@ -88,10 +88,7 @@ jobs:
       # ------------------------------------------------
       - name: Apply All Kubernetes Deployments
         run: |
-          kubectl apply -f k8s/backend/
-          kubectl apply -f k8s/postgres/
-          kubectl apply -f k8s/redis/
-          kubectl apply -f k8s/fastapi/
+          kubectl apply -f k8s/
 
       # ------------------------------------------------
       # 9) Update Backend Deployment with New Image
