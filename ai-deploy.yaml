@@ -13,8 +13,6 @@ spec:
       labels:
         app: ai-server
     spec:
-      nodeSelector:
-        nks.naver.com/nodepool: ai-pool-w-f6ec
       imagePullSecrets:
         - name: ncr-secret
       containers:
