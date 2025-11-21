@@ -31,7 +31,7 @@ jobs:
       - name: Build and Push Backend Docker image
         id: build
         run: |
-          IMAGE=contest-cluster54-registry.kr.ncr.ntruss.com/filterfacts-backend
+          IMAGE=${{ secrets.NCP_REGISTRY_URL}}/filterfacts-backend
           TAG=$(date +'%Y%m%d-%H%M%S')
           echo "TAG=$TAG" >> $GITHUB_ENV
 
