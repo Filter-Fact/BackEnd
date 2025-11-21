@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### Custom ###
-f-f-secret.yaml
+k8s/f-f-secret.yaml
