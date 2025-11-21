@@ -13,54 +13,45 @@ spec:
       labels:
         app: postgres
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - ai-pool-w-f6ec  # ❗ 문제 노드 제외
+
       containers:
         - name: postgres
           image: postgres:16
           ports:
             - containerPort: 5432
-
-          # 🔥 Postgres 컨테이너가 기동되는 데 필요한 필수 환경 변수
           env:
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
                   name: f-f-postgres-secret
                   key: POSTGRES_DB
-
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: f-f-postgres-secret
                   key: POSTGRES_USER
-
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: f-f-postgres-secret
                   key: POSTGRES_PASSWORD
+        - name: PGDATA                 # 🔥 추가
+          value: /var/lib/postgresql/data/pgdata
 
-          # 🔥 영구 저장 볼륨 연결
           volumeMounts:
             - name: postgres-volume
               mountPath: /var/lib/postgresql/data
-
-      imagePullSecrets:
-        - name: ncr-secret
 
       volumes:
         - name: postgres-volume
           persistentVolumeClaim:
             claimName: postgres-pvc
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres-service
-spec:
-  type: ClusterIP
-  selector:
-    app: postgres
-  ports:
-    - port: 5432
-      targetPort: 5432
