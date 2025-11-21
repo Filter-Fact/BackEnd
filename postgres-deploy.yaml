@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-postgres:latest
+          image: postgres:16
           ports:
             - containerPort: 5432
 
