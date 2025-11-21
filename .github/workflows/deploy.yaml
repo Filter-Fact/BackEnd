@@ -17,9 +17,9 @@ jobs:
         uses: actions/checkout@v4
 
       # ------------------------------------------------
-      # 2) Build Backend JAR (Dockerfile builder stage)
+      # 2) Build Docker Image (Backend)
       # ------------------------------------------------
-      # ⛔ JDK 설치 필요 없음 — Dockerfile 내부에서 gradle build 수행함
+      # Dockerfile 내부에서 gradle 빌드를 수행하므로 JDK 설치 필요 ❌
       - name: Build Docker Image (Backend)
         id: build
         run: |
@@ -29,9 +29,10 @@ jobs:
 
           echo "${{ secrets.NCP_REGISTRY_PASSWORD }}" | docker login \
             -u "${{ secrets.NCP_REGISTRY_USERNAME }}" \
-            --password-stdin refactoring-registry.kr.ncr.ntruss.com
+            --password-stdin ${{ secrets.NCP_REGISTRY_URL }}
 
-          docker build -t $IMAGE:$TAG -t $IMAGE:latest .
+          # 🔥 캐시 문제 방지: --no-cache 필수!
+          docker build --no-cache -t $IMAGE:$TAG -t $IMAGE:latest .
           docker push $IMAGE:$TAG
           docker push $IMAGE:latest
 
@@ -46,6 +47,7 @@ jobs:
           else
             FILE_URL="https://github.com/NaverCloudPlatform/ncp-iam-authenticator/releases/download/v1.1.1/ncp-iam-authenticator_linux_arm64"
           fi
+
           curl -fL -o ncp-iam-authenticator ${FILE_URL}
           chmod +x ncp-iam-authenticator
           sudo mv ncp-iam-authenticator /usr/local/bin/
@@ -96,8 +98,8 @@ jobs:
       - name: Deploy Backend With Updated Image Tag
         run: |
           kubectl set image deployment/f-f-backend \
-            f-f-backend=${{ secrets.NCP_REGISTRY_URL }}/filterfacts-backend:$TAG \
-            --record
+            f-f-backend=${{ secrets.NCP_REGISTRY_URL }}/filterfacts-backend:$TAG
+          
           kubectl rollout status deployment/f-f-backend --timeout=200s
 
       # ------------------------------------------------
