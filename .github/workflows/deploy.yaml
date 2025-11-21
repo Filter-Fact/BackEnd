@@ -80,7 +80,7 @@ jobs:
       # ------------------------------------------------
       - name: Apply Application Secrets
         run: |
-          echo "${{ secrets.APP_SECRET_FILE }}" | base64 --decode > f-f-secret.yaml
+          echo "${{ secrets.FF_SECRET_FILE }}" | base64 --decode > f-f-secret.yaml
           kubectl apply -f f-f-secret.yaml
 
       # ------------------------------------------------
