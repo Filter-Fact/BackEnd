@@ -21,7 +21,7 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: NotIn
                     values:
-                      - ai-pool-w-f6ec  # ❗ 문제 노드 제외
+                      - ai-pool-w-f6ec
 
       containers:
         - name: postgres
@@ -44,8 +44,8 @@ spec:
                 secretKeyRef:
                   name: f-f-postgres-secret
                   key: POSTGRES_PASSWORD
-        - name: PGDATA                 # 🔥 추가
-          value: /var/lib/postgresql/data/pgdata
+            - name: PGDATA                 # 🔥 반드시 여기에 있어야 함
+              value: /var/lib/postgresql/data/pgdata
 
           volumeMounts:
             - name: postgres-volume
