@@ -42,7 +42,7 @@ spec:
         - name: ncr-secret
       containers:
         - name: ollama
-          image: refactoring-registry.kr.ncr.ntruss.com/ollama:latest
+          image: ollama/ollama:latest
           ports:
             - containerPort: 11434
 
