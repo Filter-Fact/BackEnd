@@ -20,7 +20,7 @@ spec:
             - containerPort: 6379
 
           # ConfigMap 없이 환경변수에서 비밀번호 받아 redis-server 실행
-          command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+          command: ["sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\""]
 
           envFrom:
             - secretRef:
