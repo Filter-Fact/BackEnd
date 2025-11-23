@@ -30,21 +30,23 @@ spec:
             - name: SPRING_DATA_REDIS_HOST
               valueFrom:
                 secretKeyRef:
-                  name: f-f-secret
+                  name: redis-secret
                   key: REDIS_HOST
 
             - name: SPRING_DATA_REDIS_PORT
               valueFrom:
                 secretKeyRef:
-                  name: f-f-secret
+                  name: redis-secret
                   key: REDIS_PORT
 
             - name: SPRING_DATA_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: f-f-secret
+                  name: redis-secret
                   key: REDIS_PASSWORD
 
+            - name: SPRING_DATA_REDIS_DATABASE
+              value: "0"     # ← 반드시 필요!
       imagePullSecrets:
         - name: ncr-secret
 ---
