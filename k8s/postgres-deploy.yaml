@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: postgres
-          image: postgres:16
+          image: ankane/pgvector:latest
           ports:
             - containerPort: 5432
           env:
@@ -44,8 +44,10 @@ spec:
                 secretKeyRef:
                   name: f-f-postgres-secret
                   key: POSTGRES_PASSWORD
-            - name: PGDATA                 # 🔥 반드시 여기에 있어야 함
+
+            - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
+
 
           volumeMounts:
             - name: postgres-volume
