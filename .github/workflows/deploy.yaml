@@ -90,7 +90,7 @@ jobs:
       # ------------------------------------------------
       - name: Apply All Kubernetes Deployments
         run: |
-          kubectl apply -f k8s/
+          kubectl apply -f k8s/backend-deploy.yaml
 
       # ------------------------------------------------
       # 9) Update Backend Deployment with New Image
