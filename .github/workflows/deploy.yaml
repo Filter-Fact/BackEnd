@@ -80,7 +80,13 @@ jobs:
       # ------------------------------------------------
       - name: Inject TAG into Backend Deployment YAML
         run: |
+         echo "===== BEFORE SED ====="
+          cat k8s/backend-deploy.yaml
+          
           sed -i "s|__TAG__|$TAG|g" k8s/backend-deploy.yaml
+         
+         echo "===== AFTER SED ====="
+         cat k8s/backend-deploy.yaml
 
       # ------------------------------------------------
       # 9) Apply Backend Deployment (TAG already included)
