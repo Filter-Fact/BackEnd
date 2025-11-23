@@ -93,8 +93,8 @@ jobs:
       # ------------------------------------------------
       - name: Apply Backend Deployment with TAG
         run: |
-          kubectl apply -f k8s/backend-deploy.yaml
-          kubectl rollout status deployment/f-f-backend --timeout=200s
+          kubectl apply -f k8s/backend-deploy.yaml -n filterfacts
+          kubectl rollout status deployment/f-f-backend -n filterfacts --timeout=200s
 
       # ------------------------------------------------
       # 10) Final Status Check
