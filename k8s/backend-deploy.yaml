@@ -20,13 +20,11 @@ spec:
           ports:
             - containerPort: 8080
 
-          # ❌ envFrom 제거 (REDIS_* 충돌 문제 발생하므로 제거)
-          # envFrom:
-          #   - secretRef:
-          #       name: f-f-secret
-
-          # ✔ Redis 설정만 개별적으로 매핑
           env:
+            - # ✔ Spring application name
+            - name: SPRING_APP_NAME
+            - value: "F_F"
+
             - name: SPRING_DATA_REDIS_HOST
               valueFrom:
                 secretKeyRef:
