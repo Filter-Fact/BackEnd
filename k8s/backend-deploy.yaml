@@ -16,6 +16,7 @@ spec:
         - name: f-f-backend
           ports:
             - containerPort: 8080
+              image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-backend:latest
           imagePullPolicy: Always
 
           # envFrom 도입으로 인해 env: 개별 설정 코드가 지워짐
