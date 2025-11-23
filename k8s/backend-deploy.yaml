@@ -16,13 +16,34 @@ spec:
       containers:
         - name: f-f-backend
           image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-backend:__TAG__
-
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+
+          # Secret 전체 로드
           envFrom:
             - secretRef:
                 name: f-f-secret
+
+          # Spring Boot가 요구하는 Redis 환경변수 매핑 (필수)
+          env:
+            - name: SPRING_DATA_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: f-f-secret
+                  key: REDIS_HOST
+
+            - name: SPRING_DATA_REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: f-f-secret
+                  key: REDIS_PORT
+
+            - name: SPRING_DATA_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: f-f-secret
+                  key: REDIS_PASSWORD
 
       imagePullSecrets:
         - name: ncr-secret
