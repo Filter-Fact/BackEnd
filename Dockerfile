@@ -3,7 +3,7 @@ FROM gradle:8.5-jdk21-alpine AS builder
 WORKDIR /build
 
 # 1. 의존성 캐시 활용
-COPY build.gradle settings.gradle gradle.properties /build/
+COPY build.gradle settings.gradle/build/
 
 RUN gradle dependencies --no-daemon || true
 
