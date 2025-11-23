@@ -1,49 +1,71 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis
+  name: f-f-backend
   namespace: filterfacts
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: redis
+      app: f-f-backend
   template:
     metadata:
       labels:
-        app: redis
+        app: f-f-backend
     spec:
       containers:
-        - name: redis
-          image: redis:7
+        - name: f-f-backend
+          image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-backend:__TAG__
+          imagePullPolicy: Always
           ports:
-            - containerPort: 6379
+            - containerPort: 8080
 
-          # ConfigMap 없이 환경변수에서 비밀번호 받아 redis-server 실행
-          command: ["sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\""]
-
+          # ✔ 앱 환경 변수는 envFrom으로 간결하게 로드
           envFrom:
             - secretRef:
-                name: f-f-secret
+                name: f-f-app-secret
 
-          # Redis 데이터 저장 (비영구)
-          volumeMounts:
-            - name: redis-data
-              mountPath: /data
+          # ✔ Redis는 충돌 방지를 위해 개별 설정
+          env:
+            - name: SPRING_APP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: f-f-app-secret
+                  key: SPRING_APP_NAME
 
-      volumes:
-        - name: redis-data
-          emptyDir: {}
+            - name: SPRING_DATA_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_HOST
+
+            - name: SPRING_DATA_REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PORT
+
+            - name: SPRING_DATA_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
+
+            - name: SPRING_DATA_REDIS_DATABASE
+              value: "0"
+
+      imagePullSecrets:
+        - name: ncr-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service
+  name: backend-service
   namespace: filterfacts
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
-    app: redis
+    app: f-f-backend
   ports:
-    - port: 6379
-      targetPort: 6379
+    - port: 80
+      targetPort: 8080
