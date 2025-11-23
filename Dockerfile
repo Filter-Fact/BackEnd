@@ -1,9 +1,14 @@
+# ----------------------
+# 1st stage: Build Stage
+# ----------------------
 FROM gradle:8.5-jdk21-alpine AS builder
 
 WORKDIR /build
 
 # 1. 의존성 캐시 활용
-COPY build.gradle settings.gradle/build/
+COPY build.gradle /build/
+COPY settings.gradle /build/
+
 
 RUN gradle dependencies --no-daemon || true
 
@@ -16,7 +21,6 @@ RUN rm -rf /build/build/
 # 4. 빌드 실행
 RUN gradle clean build -x test --no-daemon --parallel
 
-# ------------------------------
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
@@ -27,4 +31,3 @@ EXPOSE 8080
 USER 1001
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
-
