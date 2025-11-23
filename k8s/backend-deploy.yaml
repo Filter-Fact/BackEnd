@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: f-f-backend
-          image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-backend:latest
+          image: refactoring-registry.kr.ncr.ntruss.com/filterfacts-backend:__TAG__
+
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
