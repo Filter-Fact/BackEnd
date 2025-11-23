@@ -20,12 +20,12 @@ spec:
           ports:
             - containerPort: 8080
 
-          # Secret 전체 로드
-          envFrom:
-            - secretRef:
-                name: f-f-secret
+          # ❌ envFrom 제거 (REDIS_* 충돌 문제 발생하므로 제거)
+          # envFrom:
+          #   - secretRef:
+          #       name: f-f-secret
 
-          # Spring Boot가 요구하는 Redis 환경변수 매핑 (필수)
+          # ✔ Redis 설정만 개별적으로 매핑
           env:
             - name: SPRING_DATA_REDIS_HOST
               valueFrom:
@@ -44,8 +44,11 @@ spec:
                 secretKeyRef:
                   name: f-f-secret
                   key: REDIS_PASSWORD
+
             - name: SPRING_DATA_REDIS_DATABASE
               value: "0"
+
+            # 나머지 Spring 환경변수도 필요하면 여기에 추가 (DB, JWT 등)
 
       imagePullSecrets:
         - name: ncr-secret
