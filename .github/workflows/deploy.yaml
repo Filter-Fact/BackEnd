@@ -19,7 +19,6 @@ jobs:
       # ------------------------------------------------
       # 2) Build Docker Image (Backend)
       # ------------------------------------------------
-      # Dockerfile 내부에서 gradle 빌드를 수행하므로 JDK 설치 필요 ❌
       - name: Build Docker Image (Backend)
         id: build
         run: |
@@ -31,10 +30,8 @@ jobs:
             -u "${{ secrets.NCP_REGISTRY_USERNAME }}" \
             --password-stdin ${{ secrets.NCP_REGISTRY_URL }}
 
-          # 🔥 캐시 문제 방지: --no-cache 필수!
-          docker build --no-cache -t $IMAGE:$TAG -t $IMAGE:latest .
+          docker build --no-cache -t $IMAGE:$TAG .
           docker push $IMAGE:$TAG
-          docker push $IMAGE:latest
 
       # ------------------------------------------------
       # 3) Install Naver Cloud IAM Authenticator
@@ -53,7 +50,7 @@ jobs:
           sudo mv ncp-iam-authenticator /usr/local/bin/
 
       # ------------------------------------------------
-      # 4) Restore IAM Config (~/.ncloud/configure)
+      # 4) Restore IAM Config
       # ------------------------------------------------
       - name: Restore Naver Cloud IAM Config
         run: |
@@ -62,7 +59,7 @@ jobs:
           chmod 600 $HOME/.ncloud/configure
 
       # ------------------------------------------------
-      # 5) Restore Kubeconfig (~/.kube/config)
+      # 5) Restore Kubeconfig
       # ------------------------------------------------
       - name: Restore kubeconfig
         run: |
@@ -71,14 +68,7 @@ jobs:
           chmod 600 $HOME/.kube/config
 
       # ------------------------------------------------
-      # 6) Test Kubernetes Connection
-      # ------------------------------------------------
-      - name: Test NKS Connection
-        run: |
-          kubectl get nodes
-
-      # ------------------------------------------------
-      # 7) Apply Secret (f-f-secret.yaml)
+      # 7) Apply Secret
       # ------------------------------------------------
       - name: Apply Application Secrets
         run: |
@@ -86,20 +76,18 @@ jobs:
           kubectl apply -f f-f-secret.yaml
 
       # ------------------------------------------------
-      # 8) Apply All Deployments
+      # 8) Inject TAG into backend-deploy.yaml
       # ------------------------------------------------
-      - name: Apply All Kubernetes Deployments
+      - name: Inject TAG into Backend Deployment YAML
         run: |
-          kubectl apply -f k8s/backend-deploy.yaml
+          sed -i "s|__TAG__|$TAG|g" k8s/backend-deploy.yaml
 
       # ------------------------------------------------
-      # 9) Update Backend Deployment with New Image
+      # 9) Apply Backend Deployment (TAG already included)
       # ------------------------------------------------
-      - name: Deploy Backend With Updated Image Tag
+      - name: Apply Backend Deployment with TAG
         run: |
-          kubectl set image deployment/f-f-backend \
-            f-f-backend=${{ secrets.NCP_REGISTRY_URL }}/filterfacts-backend:$TAG
-          
+          kubectl apply -f k8s/backend-deploy.yaml
           kubectl rollout status deployment/f-f-backend --timeout=200s
 
       # ------------------------------------------------
