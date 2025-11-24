@@ -21,10 +21,9 @@ public class ConversationService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
 
-    /** 채팅방 생성 */
     @Transactional
     public Conversation startConversation(String userId, String title) {
-        // 존재하는 회원인지 검증
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(RsCode.USER_NOT_FOUND));
 
@@ -35,13 +34,11 @@ public class ConversationService {
         return conversationRepository.save(c);
     }
 
-    /** 내 채팅방 목록 */
     public Page<StartConversationResponse> listConversations(String userId, int page, int size) {
         return conversationRepository.findByUser_UserIdOrderByCreatedAtDesc(
                 userId, PageRequest.of(page, size));
     }
 
-    /** 소유 검증 포함 조회(메시지 서비스에서 사용) */
     public Conversation getOwnedConversation(String userId, Long conversationId) {
         Conversation conv = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));

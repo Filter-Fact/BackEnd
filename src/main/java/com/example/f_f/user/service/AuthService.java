@@ -26,14 +26,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
 
-    // 회원가입
     public String register(RegisterRequest req) {
-        // userId 중복 확인
+
         if (userRepository.existsByUserId(req.userId())) {
             throw new CustomException(RsCode.DUPLICATE_USER_ID);
         }
 
-        // 이메일 인증 선확인
         emailVerificationService.ensureVerified(req.email(), String.valueOf(Purpose.SIGN_UP));
 
         User u = new User();
@@ -44,7 +42,6 @@ public class AuthService {
         return u.getUserId();
     }
 
-    // 로그인
     public TokenResponse login(LoginRequest req) {
 
         Authentication auth = authManager.authenticate(
@@ -63,7 +60,6 @@ public class AuthService {
         return new TokenResponse(access, expMs, refresh);
     }
 
-    // 토큰 재발급
     public TokenResponse refresh(RefreshRequest req) {
         String refresh = req.refreshToken();
         if (!jwt.isTokenValid(refresh) || !jwt.isRefresh(refresh)) {
@@ -99,7 +95,7 @@ public class AuthService {
         store.revokeRefresh(username, refresh);
     }
 
-    public void logoutAll(String username) {
-        store.revokeAll(username);
-    }
+//    public void logoutAll(String username) {
+//        store.revokeAll(username);
+//    }
 }

@@ -20,7 +20,8 @@ public class ConversationController {
     @PostMapping
     public ResponseEntity<StartConversationResponse> startConversation(Authentication auth,
                                                                        @RequestBody StartConversationRequest req) {
-        Conversation conv = conversationService.startConversation(auth.getName(), req.getTitle());
+        Conversation conv = conversationService.startConversation(auth.getName(), req.title());
+
         return ResponseEntity.ok(new StartConversationResponse(conv.getId(), conv.getTitle(), conv.getCreatedAt()));
     }
 
@@ -28,6 +29,7 @@ public class ConversationController {
     public ResponseEntity<Page<StartConversationResponse>> listConversations(Authentication auth,
                                                 @RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "20") int size) {
+
         return ResponseEntity.ok(conversationService.listConversations(auth.getName(), page, size));
     }
 }

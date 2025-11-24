@@ -10,7 +10,6 @@ import com.example.f_f.chat.repository.ChatMessageRepository;
 import com.example.f_f.chat.repository.ConversationRepository;
 import com.example.f_f.global.exception.CustomException;
 import com.example.f_f.global.exception.RsCode;
-import com.example.f_f.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,25 +27,21 @@ public class ChatMessageService {
     private final ConversationRepository conversationRepo;
     private final ChatMessageRepository messageRepo;
 
-    // FastAPI 연동용
     private final WebClient fastApiClient;
 
     @Value("${fastapi.ask-path}")
     private String askPath;
 
-    /** 어시스턴트 메시지 추가 (→ FastAPI 호출, 응답 저장) */
     @Transactional
     public AnswerResponse addAssistantMessage(Long conversationId, String userId, String userQuestion) {
-        // 대화방 존재 검증
+
         Conversation conv = conversationRepo.findById(conversationId)
                 .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
 
-        // 대화방/소유자 검증
         if (!conv.getUser().getUserId().equals(userId)) {
             throw new CustomException(RsCode.FORBIDDEN);
         }
 
-        // 2) 사용자 메시지 저장 (ROLE = USER)
         ChatMessage userMsg = ChatMessage.builder()
                 .conversation(conv)
                 .role(Role.USER)
@@ -54,7 +49,6 @@ public class ChatMessageService {
                 .build();
         messageRepo.save(userMsg);
 
-         // 3) FastAPI 호출 (실제 구현 시 WebClient 사용)
          AnswerResponse aiAnswer = fastApiClient.post()
                 .uri(askPath)
                 .bodyValue(new UserQuestionDto(userQuestion))
@@ -62,31 +56,25 @@ public class ChatMessageService {
                 .bodyToMono(AnswerResponse.class)
                 .block(Duration.ofSeconds(3000));
 
-
-        // ai 응답 없음
         if (aiAnswer == null || aiAnswer.answer() == null || aiAnswer.answer().isBlank()) {
             throw new CustomException(RsCode.AI_EMPTY_RESPONSE);
         }
 
-        // 4) 어시스턴트 메시지 저장 (ROLE = ASSISTANT)
         ChatMessage botMsg = ChatMessage.builder()
                 .conversation(conv)
                 .role(Role.ASSISTANT)
-                .content(aiAnswer.answer()) // ✅ record 필드 접근
+                .content(aiAnswer.answer())
                 .build();
         messageRepo.save(botMsg);
 
-        // 5) 클라이언트로는 AnswerResponse 그대로 반환
         return aiAnswer;
     }
 
 
-    /** 메시지 목록(시간순) */
     public Page<ChatMessageDto> listMessages(String userId, Long conversationId, int page, int size) {
         Conversation conversation = conversationRepo.findById(conversationId)
                 .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
 
-        // 방 주인인지 검증
         if (!conversation.getUser().getUserId().equals(userId)) {
             throw new CustomException(RsCode.FORBIDDEN);
         }

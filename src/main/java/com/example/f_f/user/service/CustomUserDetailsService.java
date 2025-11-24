@@ -15,18 +15,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // username 파라미터 = 우리 시스템의 userId 로 사용
+
         var user = users.findByUserId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 권한 없이(빈 리스트) 반환. 비밀번호는 DB에 저장된 해시 그대로.
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUserId())
                 .password(user.getPassword())
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
-                .disabled(false)            // 필요하면 엔티티 필드로 제어
+                .disabled(false)
                 .build();
     }
 }

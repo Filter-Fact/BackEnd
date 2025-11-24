@@ -13,6 +13,7 @@ import java.util.Set;
 @ConditionalOnClass(StringRedisTemplate.class)
 public class RedisTokenStore implements TokenStore {
     private final StringRedisTemplate redis;
+
     public RedisTokenStore(StringRedisTemplate redis) { this.redis = redis; }
 
     private String key(String username, String token) { return "refresh:" + username + ":" + token; }

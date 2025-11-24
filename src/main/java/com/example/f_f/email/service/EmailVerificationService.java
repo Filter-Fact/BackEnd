@@ -18,34 +18,28 @@ public class EmailVerificationService {
     private final JavaMailSender mailSender;
     private final Random random = new Random();
 
-    // TTL 정책
     private static final Duration CODE_TTL = Duration.ofMinutes(5);
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(15);
 
     public void sendVerificationCode(String email, String purpose) {
         String code = generate6Digit();
 
-        // Redis에 저장 (5분 유효)
         redis.opsForValue().set(codeKey(email, purpose), code, CODE_TTL);
 
-        // 메일 전송
         sendMail(email, purpose, code);
     }
 
     public void verifyAndMarkAsVerified(String email, String purpose, String code) {
         String savedCode = redis.opsForValue().get(codeKey(email, purpose));
 
-        //이메일 인증 코드 검증에 대해 에러 세분화
         if (savedCode == null) {
             throw new CustomException(RsCode.VERIFICATION_TIME_OUT);
         } else if (!savedCode.equals(code)) {
             throw new CustomException(RsCode.INVALID_VERIFICATION_CODE);
         }
 
-        // 사용 후 즉시 코드 삭제
         redis.delete(codeKey(email, purpose));
 
-        // 인증 완료 마크(15분 동안 유효)
         redis.opsForValue().set(verifiedKey(email, purpose), "1", VERIFIED_TTL);
     }
 
@@ -70,9 +64,11 @@ public class EmailVerificationService {
     private String codeKey(String email, String purpose) {
         return "ev:code:" + purpose + ":" + email;
     }
+
     private String verifiedKey(String email, String purpose) {
         return "ev:verified:" + purpose + ":" + email;
     }
+
     private String generate6Digit() {
         return String.format("%06d", random.nextInt(1_000_000));
     }

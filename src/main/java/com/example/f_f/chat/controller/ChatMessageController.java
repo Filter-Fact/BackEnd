@@ -22,17 +22,15 @@ public class ChatMessageController {
                                              @RequestParam Long conversationId,
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "5") int size) {
+
         return ResponseEntity.ok(chatMessageService.listMessages(auth.getName(), conversationId, page, size));
     }
 
-    /** 안드로이드: 질문 → (AI)응답 한 번에 */
     @PostMapping("/ask")
     public ResponseEntity<AnswerResponse> ask(Authentication auth, @RequestBody QuestionRequest req) {
 
-        // 3) 어시스턴트 답변 저장
-        AnswerResponse answer = chatMessageService.addAssistantMessage(req.getConversationId(), auth.getName(), req.getQuestion());
+        AnswerResponse answer = chatMessageService.addAssistantMessage(req.conversationId(), auth.getName(), req.question());
 
-        // 4) 응답
         return ResponseEntity.ok(answer);
     }
 }

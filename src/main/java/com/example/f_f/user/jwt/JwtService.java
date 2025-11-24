@@ -28,6 +28,7 @@ public class JwtService {
 
     public String generateAccessToken(UserDetails user) {
         Instant now = Instant.now();
+
         return Jwts.builder()
                 .setId(UUID.randomUUID().toString())              // jti (추후 로그아웃 블랙리스트용 확장 가능)
                 .setSubject(user.getUsername())
@@ -36,6 +37,7 @@ public class JwtService {
                 .setExpiration(Date.from(now.plusMillis(accessExpMs)))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
     }
 
     public String generateRefreshToken(UserDetails user) {
