@@ -2,6 +2,7 @@ package com.example.f_f.chat.entity;
 
 import com.example.f_f.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Table(name = "conversations")
 @Getter
 @Builder
+@AllArgsConstructor
 public class Conversation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

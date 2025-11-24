@@ -1,6 +1,7 @@
 package com.example.f_f.chat.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Table(name="chat_messages")
 @Getter
 @Builder
+@AllArgsConstructor
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
