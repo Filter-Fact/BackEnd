@@ -38,3 +38,4 @@ out/
 
 ### Custom ###
 k8s/f-f-secret.yaml
+k8s/redis-secret.yaml
