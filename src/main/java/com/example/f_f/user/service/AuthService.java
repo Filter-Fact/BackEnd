@@ -45,7 +45,7 @@ public class AuthService {
     public TokenResponse login(LoginRequest req) {
 
         Authentication auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.username(), req.password())
+                new UsernamePasswordAuthenticationToken(req.userId(), req.password())
         );
 
         UserDetails user = (UserDetails) auth.getPrincipal();
@@ -66,22 +66,22 @@ public class AuthService {
             throw new CustomException(RsCode.INVALID_REFRESH_TOKEN);
         }
 
-        String username = jwt.getUsername(refresh);
-        if (!store.isRefreshValid(username, refresh)) {
+        String userId = jwt.getUsername(refresh);
+        if (!store.isRefreshValid(userId, refresh)) {
             throw new CustomException(RsCode.INVALID_REFRESH_TOKEN);
         }
 
-        store.revokeRefresh(username, refresh);
+        store.revokeRefresh(userId, refresh);
 
         UserDetails stub = org.springframework.security.core.userdetails.User
-                .withUsername(username).password("N/A").build();
+                .withUsername(userId).password("N/A").build();
 
         String newAccess = jwt.generateAccessToken(stub);
         String newRefresh = jwt.generateRefreshToken(stub);
 
         long expMs = jwt.getExpiration(newAccess).getTime() - System.currentTimeMillis();
         long refreshTtl = jwt.getExpiration(newRefresh).getTime() - System.currentTimeMillis();
-        store.saveRefresh(username, newRefresh, refreshTtl);
+        store.saveRefresh(userId, newRefresh, refreshTtl);
 
         return new TokenResponse(newAccess, expMs, newRefresh);
     }

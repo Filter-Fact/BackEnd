@@ -27,8 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);
             if (jwt.isTokenValid(token)) {
-                String username = jwt.getUsername(token);
-                UserDetails user = uds.loadUserByUsername(username);
+                String userId = jwt.getUsername(token);
+                UserDetails user = uds.loadUserByUsername(userId);
                 var at = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(at);
             }

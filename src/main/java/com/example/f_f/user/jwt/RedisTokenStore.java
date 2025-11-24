@@ -16,21 +16,21 @@ public class RedisTokenStore implements TokenStore {
 
     public RedisTokenStore(StringRedisTemplate redis) { this.redis = redis; }
 
-    private String key(String username, String token) { return "refresh:" + username + ":" + token; }
+    private String key(String userId, String token) { return "refresh:" + userId + ":" + token; }
 
-    @Override public void saveRefresh(String username, String refreshToken, long ttlMs) {
-        redis.opsForValue().set(key(username, refreshToken), "1", Duration.ofMillis(ttlMs));
+    @Override public void saveRefresh(String userId, String refreshToken, long ttlMs) {
+        redis.opsForValue().set(key(userId, refreshToken), "1", Duration.ofMillis(ttlMs));
     }
-    @Override public boolean isRefreshValid(String username, String refreshToken) {
-        return Boolean.TRUE.equals(redis.hasKey(key(username, refreshToken)));
+    @Override public boolean isRefreshValid(String userId, String refreshToken) {
+        return Boolean.TRUE.equals(redis.hasKey(key(userId, refreshToken)));
     }
-    @Override public void revokeRefresh(String username, String refreshToken) {
-        redis.delete(key(username, refreshToken));
+    @Override public void revokeRefresh(String userId, String refreshToken) {
+        redis.delete(key(userId, refreshToken));
     }
     @Override
-    public void revokeAll(String username) {
+    public void revokeAll(String userId) {
         // 패턴 삭제 (주의: 대량 키에선 SCAN 사용)
-        Set<String> keys = redis.keys("rt:" + username + ":*");
+        Set<String> keys = redis.keys("rt:" + userId + ":*");
         if (keys != null && !keys.isEmpty()) redis.delete(keys);
     }
 }
