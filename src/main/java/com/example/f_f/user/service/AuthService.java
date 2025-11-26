@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
 
+    @Transactional
     public String register(RegisterRequest req) {
 
         if (userRepository.existsByUserId(req.userId())) {
@@ -95,7 +97,4 @@ public class AuthService {
         store.revokeRefresh(username, refresh);
     }
 
-//    public void logoutAll(String username) {
-//        store.revokeAll(username);
-//    }
 }

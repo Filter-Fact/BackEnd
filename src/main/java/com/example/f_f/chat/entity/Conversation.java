@@ -20,7 +20,7 @@ import java.util.List;
 public class Conversation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; //db내에 컬럼명이 id
 
     // 다:1 (여러 대화가 한 명의 사용자에게)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

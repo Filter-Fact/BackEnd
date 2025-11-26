@@ -28,9 +28,8 @@ public class JwtService {
 
     public String generateAccessToken(UserDetails user) {
         Instant now = Instant.now();
-
         return Jwts.builder()
-                .setId(UUID.randomUUID().toString())              // jti (추후 로그아웃 블랙리스트용 확장 가능)
+                .setId(UUID.randomUUID().toString())
                 .setSubject(user.getUsername())
                 .addClaims(Map.of("roles", user.getAuthorities()))
                 .setIssuedAt(Date.from(now))

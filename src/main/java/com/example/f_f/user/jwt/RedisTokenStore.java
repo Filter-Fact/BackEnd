@@ -6,7 +6,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.Set;
 
 @Component
 @Primary
@@ -26,11 +25,5 @@ public class RedisTokenStore implements TokenStore {
     }
     @Override public void revokeRefresh(String userId, String refreshToken) {
         redis.delete(key(userId, refreshToken));
-    }
-    @Override
-    public void revokeAll(String userId) {
-        // 패턴 삭제 (주의: 대량 키에선 SCAN 사용)
-        Set<String> keys = redis.keys("rt:" + userId + ":*");
-        if (keys != null && !keys.isEmpty()) redis.delete(keys);
     }
 }
