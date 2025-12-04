@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.naming.AuthenticationException;
-import java.net.BindException;
-import java.nio.file.AccessDeniedException;
+import org.springframework.validation.BindException;
+import org.springframework.security.access.AccessDeniedException;
+
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

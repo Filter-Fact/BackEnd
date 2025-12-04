@@ -2,6 +2,7 @@ package com.example.f_f.email.service;
 
 import com.example.f_f.global.exception.CustomException;
 import com.example.f_f.global.exception.RsCode;
+import com.example.f_f.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,12 +17,18 @@ public class EmailVerificationService {
 
     private final StringRedisTemplate redis;
     private final JavaMailSender mailSender;
+    private final UserRepository userRepository;
     private final Random random = new Random();
 
     private static final Duration CODE_TTL = Duration.ofMinutes(5);
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(15);
 
     public void sendVerificationCode(String email, String purpose) {
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new CustomException(RsCode.ALREADY_USING_EMAIL);
+        }
+
         String code = generate6Digit();
 
         redis.opsForValue().set(codeKey(email, purpose), code, CODE_TTL);

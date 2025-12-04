@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -19,18 +20,19 @@ public class ChatMessageController {
 
     @GetMapping("/messages")
     public ResponseEntity<Page<ChatMessageDto>> listMessages(Authentication auth,
-                                             @RequestParam Long conversationId,
-                                             @RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "5") int size) {
+                                                             @RequestParam Long conversationId,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "5") int size) {
 
         return ResponseEntity.ok(chatMessageService.listMessages(auth.getName(), conversationId, page, size));
     }
 
     @PostMapping("/ask")
-    public ResponseEntity<AnswerResponse> ask(Authentication auth, @RequestBody QuestionRequest req) {
+    public Mono<ResponseEntity<AnswerResponse>> ask(Authentication auth,
+                                                    @RequestBody QuestionRequest req) {
 
-        AnswerResponse answer = chatMessageService.addAssistantMessage(req.conversationId(), auth.getName(), req.question());
-
-        return ResponseEntity.ok(answer);
+        return chatMessageService
+                .addAssistantMessage(req.conversationId(), auth.getName(), req.question())
+                .map(ResponseEntity::ok);
     }
 }

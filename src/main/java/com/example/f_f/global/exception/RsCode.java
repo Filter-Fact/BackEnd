@@ -9,7 +9,7 @@ public enum RsCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "요청 값이 올바르지 않습니다."),
 
     // ---------- 인증/인가 ----------
-    UNAUTHORIZED(HttpStatus.FORBIDDEN, "UNAUTHORIZED", "인증이 필요합니다."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
 
     // ---------- 사용자/리소스 ----------
@@ -24,6 +24,8 @@ public enum RsCode {
     // ---------- Email ----------
     VERIFICATION_TIME_OUT(HttpStatus.BAD_REQUEST, "VERIFICATION_TIME_OUT", "인증 코드가 만료되었습니다."),
     INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_CODE", "인증 코드가 올바르지 않습니다."),
+    ALREADY_USING_EMAIL(HttpStatus.CONFLICT, "ALREADY_USING_EMAIL", "중복된 이메일입니다." ),
+
 
     // ---------- AI ----------
     AI_UPSTREAM_ERROR(HttpStatus.BAD_GATEWAY, "AI_UPSTREAM_ERROR", "외부 서비스 오류가 발생했습니다."),

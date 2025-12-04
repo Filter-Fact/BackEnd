@@ -10,13 +10,15 @@ import com.example.f_f.chat.repository.ChatMessageRepository;
 import com.example.f_f.chat.repository.ConversationRepository;
 import com.example.f_f.global.exception.CustomException;
 import com.example.f_f.global.exception.RsCode;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 
@@ -26,51 +28,67 @@ public class ChatMessageService {
 
     private final ConversationRepository conversationRepo;
     private final ChatMessageRepository messageRepo;
-
     private final WebClient fastApiClient;
 
     @Value("${fastapi.ask-path}")
     private String askPath;
 
-    @Transactional
-    public AnswerResponse addAssistantMessage(Long conversationId, String userId, String userQuestion) {
+    /**
+     * AI 서버 호출 + 메시지 저장을 포함한 리액티브 흐름
+     */
+    public Mono<AnswerResponse> addAssistantMessage(Long conversationId, String userId, String userQuestion) {
 
-        Conversation conv = conversationRepo.findById(conversationId)
-                .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
+        return Mono.defer(() -> {
+                    // 1) 대화방 조회 + 권한 검증 + USER 메시지 저장 (블로킹)
+                    Conversation conv = conversationRepo.findById(conversationId)
+                            .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
 
-        if (!conv.getUser().getUserId().equals(userId)) {
-            throw new CustomException(RsCode.FORBIDDEN);
-        }
+                    if (!conv.getUser().getUserId().equals(userId)) {
+                        throw new CustomException(RsCode.FORBIDDEN);
+                    }
 
-        ChatMessage userMsg = ChatMessage.builder()
-                .conversation(conv)
-                .role(Role.USER)
-                .content(userQuestion)
-                .build();
-        messageRepo.save(userMsg);
+                    ChatMessage userMsg = ChatMessage.builder()
+                            .conversation(conv)
+                            .role(Role.USER)
+                            .content(userQuestion)
+                            .build();
+                    messageRepo.save(userMsg);
 
-         AnswerResponse aiAnswer = fastApiClient.post()
-                .uri(askPath)
-                .bodyValue(new UserQuestionDto(userQuestion))
-                .retrieve()
-                .bodyToMono(AnswerResponse.class)
-                .block(Duration.ofSeconds(3000));
+                    // 2) WebClient로 AI 서버 호출 (논블로킹)
+                    return fastApiClient.post()
+                            .uri(askPath)
+                            .bodyValue(new UserQuestionDto(userQuestion))
+                            .retrieve()
+                            .bodyToMono(AnswerResponse.class)
+                            .timeout(Duration.ofSeconds(30)); // 필요에 따라 설정
+                })
+                // 위의 전체 블록(대화방 조회 + 저장 + AI 호출)을 boundedElastic에서 실행
+                .subscribeOn(Schedulers.boundedElastic())
+                // 3) 응답 검증 + ASSISTANT 메시지 저장
+                .flatMap(aiAnswer -> {
+                    if (aiAnswer == null || aiAnswer.answer() == null || aiAnswer.answer().isBlank()) {
+                        return Mono.error(new CustomException(RsCode.AI_EMPTY_RESPONSE));
+                    }
 
-        if (aiAnswer == null || aiAnswer.answer() == null || aiAnswer.answer().isBlank()) {
-            throw new CustomException(RsCode.AI_EMPTY_RESPONSE);
-        }
+                    return Mono.fromRunnable(() -> {
+                                Conversation conv = conversationRepo.findById(conversationId)
+                                        .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
 
-        ChatMessage botMsg = ChatMessage.builder()
-                .conversation(conv)
-                .role(Role.ASSISTANT)
-                .content(aiAnswer.answer())
-                .build();
-        messageRepo.save(botMsg);
-
-        return aiAnswer;
+                                ChatMessage botMsg = ChatMessage.builder()
+                                        .conversation(conv)
+                                        .role(Role.ASSISTANT)
+                                        .content(aiAnswer.answer())
+                                        .build();
+                                messageRepo.save(botMsg);
+                            })
+                            .thenReturn(aiAnswer);
+                });
     }
 
-
+    /**
+     * 기존 페이지 조회는 동기 + 트랜잭션 유지
+     */
+    @Transactional(readOnly = true)
     public Page<ChatMessageDto> listMessages(String userId, Long conversationId, int page, int size) {
         Conversation conversation = conversationRepo.findById(conversationId)
                 .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
