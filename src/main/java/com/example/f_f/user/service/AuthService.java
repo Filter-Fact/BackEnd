@@ -35,6 +35,7 @@ public class AuthService {
             throw new CustomException(RsCode.DUPLICATE_USER_ID);
         }
 
+        //이메일 검증 로직 수정, 반환 없이 단순 검증
         emailVerificationService.ensureVerified(req.email(), String.valueOf(Purpose.SIGN_UP));
 
         User u = new User();
@@ -65,6 +66,8 @@ public class AuthService {
 
     public TokenResponse refresh(RefreshRequest req) {
         String refresh = req.refreshToken();
+
+        //토큰 검증 로직 최종, 반환없이 단순 검증
         if (!jwt.isTokenValid(refresh) || !jwt.isRefresh(refresh)) {
             throw new CustomException(RsCode.INVALID_REFRESH_TOKEN);
         }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+//최종 end-point
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

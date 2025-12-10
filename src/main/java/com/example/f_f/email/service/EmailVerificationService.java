@@ -20,6 +20,7 @@ public class EmailVerificationService {
     private final UserRepository userRepository;
     private final Random random = new Random();
 
+    //ttl 시간 변경
     private static final Duration CODE_TTL = Duration.ofMinutes(5);
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(15);
 
@@ -50,6 +51,7 @@ public class EmailVerificationService {
         redis.opsForValue().set(verifiedKey(email, purpose), "1", VERIFIED_TTL);
     }
 
+    //회원가입 시 이메일 로직 최종 수정 및 예외 반환 수정
     public void ensureVerified(String email, String purpose) {
         String v = redis.opsForValue().get(verifiedKey(email, purpose));
 
