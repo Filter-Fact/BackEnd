@@ -24,6 +24,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatMessageService {
 
     private final ConversationRepository conversationRepo;
@@ -36,6 +37,7 @@ public class ChatMessageService {
     /**
      * AI 서버 호출 + 메시지 저장을 포함한 리액티브 흐름
      */
+    @Transactional
     public Mono<AnswerResponse> addAssistantMessage(Long conversationId, String userId, String userQuestion) {
 
         return Mono.defer(() -> {
@@ -88,7 +90,6 @@ public class ChatMessageService {
     /**
      * 기존 페이지 조회는 동기 + 트랜잭션 유지
      */
-    @Transactional(readOnly = true)
     public Page<ChatMessageDto> listMessages(String userId, Long conversationId, int page, int size) {
         Conversation conversation = conversationRepo.findById(conversationId)
                 .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
