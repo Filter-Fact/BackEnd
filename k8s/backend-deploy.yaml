@@ -25,30 +25,9 @@ spec:
             - secretRef:
                 name: f-f-secret
 
-          # Spring Boot가 요구하는 Redis 환경변수 매핑 (필수)
-          env:
-            - name: SPRING_DATA_REDIS_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: redis-secret
-                  key: REDIS_HOST
-
-            - name: SPRING_DATA_REDIS_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: redis-secret
-                  key: REDIS_PORT
-
-            - name: SPRING_DATA_REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: redis-secret
-                  key: REDIS_PASSWORD
-
-            - name: SPRING_DATA_REDIS_DATABASE
-              value: "0"     # ← 반드시 필요!
       imagePullSecrets:
         - name: ncr-secret
+
 ---
 apiVersion: v1
 kind: Service
