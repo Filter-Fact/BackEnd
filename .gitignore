@@ -39,3 +39,7 @@ out/
 ### Custom ###
 k8s/f-f-secret.yaml
 k8s/redis-secret.yaml
+k8s/ollama-deploy.yaml
+k8s/postgres-deploy.yaml
+k8s/postgres-pvc.yaml
+k8s/redis-deploy.yaml
