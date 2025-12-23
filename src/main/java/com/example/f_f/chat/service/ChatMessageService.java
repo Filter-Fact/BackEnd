@@ -29,6 +29,7 @@ public class ChatMessageService {
 
     private final ConversationRepository conversationRepo;
     private final ChatMessageRepository messageRepo;
+    private final ChatStoreService chatStoreService;
     private final WebClient fastApiClient;
 
     @Value("${fastapi.ask-path}")
@@ -37,55 +38,32 @@ public class ChatMessageService {
     /**
      * AI 서버 호출 + 메시지 저장을 포함한 리액티브 흐름
      */
-    @Transactional
     public Mono<AnswerResponse> addAssistantMessage(Long conversationId, String userId, String userQuestion) {
 
-        return Mono.defer(() -> {
-                    // 1) 대화방 조회 + 권한 검증 + USER 메시지 저장 (블로킹)
-                    Conversation conv = conversationRepo.findById(conversationId)
-                            .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
-
-                    if (!conv.getUser().getUserId().equals(userId)) {
-                        throw new CustomException(RsCode.FORBIDDEN);
-                    }
-
-                    ChatMessage userMsg = ChatMessage.builder()
-                            .conversation(conv)
-                            .role(Role.USER)
-                            .content(userQuestion)
-                            .build();
-                    messageRepo.save(userMsg);
-
-                    // 2) WebClient로 AI 서버 호출 (논블로킹)
-                    return fastApiClient.post()
-                            .uri(askPath)
-                            .bodyValue(new UserQuestionDto(userQuestion))
-                            .retrieve()
-                            .bodyToMono(AnswerResponse.class)
-                            .timeout(Duration.ofSeconds(30)); // 필요에 따라 설정
-                })
-                // 위의 전체 블록(대화방 조회 + 저장 + AI 호출)을 boundedElastic에서 실행
+        return Mono.fromCallable(() -> chatStoreService.saveUserMessage(conversationId, userId, userQuestion))
                 .subscribeOn(Schedulers.boundedElastic())
-                // 3) 응답 검증 + ASSISTANT 메시지 저장
+                .flatMap(conv ->
+                        fastApiClient.post()
+                                .uri(askPath)
+                                .bodyValue(new UserQuestionDto(userQuestion))
+                                .retrieve()
+                                .bodyToMono(AnswerResponse.class)
+                                .timeout(Duration.ofSeconds(30))
+                )
                 .flatMap(aiAnswer -> {
                     if (aiAnswer == null || aiAnswer.answer() == null || aiAnswer.answer().isBlank()) {
                         return Mono.error(new CustomException(RsCode.AI_EMPTY_RESPONSE));
                     }
 
-                    return Mono.fromRunnable(() -> {
-                                Conversation conv = conversationRepo.findById(conversationId)
-                                        .orElseThrow(() -> new CustomException(RsCode.CHATROOM_NOT_FOUND));
-
-                                ChatMessage botMsg = ChatMessage.builder()
-                                        .conversation(conv)
-                                        .role(Role.ASSISTANT)
-                                        .content(aiAnswer.answer())
-                                        .build();
-                                messageRepo.save(botMsg);
-                            })
+                    return Mono.fromRunnable(() ->
+                                    chatStoreService.saveAssistantMessage(conversationId, aiAnswer.answer())
+                            )
+                            .subscribeOn(Schedulers.boundedElastic())
                             .thenReturn(aiAnswer);
                 });
     }
+
+
 
     /**
      * 기존 페이지 조회는 동기 + 트랜잭션 유지

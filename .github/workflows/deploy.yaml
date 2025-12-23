@@ -30,8 +30,12 @@ jobs:
             -u "${{ secrets.NCP_REGISTRY_USERNAME }}" \
             --password-stdin ${{ secrets.NCP_REGISTRY_URL }}
 
-          docker build --no-cache -t $IMAGE:$TAG .
-          docker push $IMAGE:$TAG
+      # 수정 포인트: --no-cache 제거 및 buildx 캐시 옵션 추가
+          docker build \
+            --push \
+            -t $IMAGE:$TAG \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max
 
       # ------------------------------------------------
       # 3) Install Naver Cloud IAM Authenticator
